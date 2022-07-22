@@ -10,12 +10,18 @@ const taskList = [
 ];
 
 app.get("/tasks", (req, res) => {
-  res.send(JSON.stringify(taskList));
+  res.send(taskList);
 });
 
 app.post("/tasks", (req, res) => {
-  console.log("post");
-  res.send("200 ok post");
+  const id = taskList.length + 1;
+  const taskName = req.body.name;
+  const taskDescription = req.body.description;
+
+  const newTask = { id: id, name: taskName, description: taskDescription };
+  taskList.push(newTask);
+
+  res.send(taskList);
 });
 
 app.get("/tasks/:id", (req, res) => {
