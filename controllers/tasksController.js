@@ -1,6 +1,16 @@
 const taskList = [
-  { id: 1, name: "task1", description: "this is task1 description" },
-  { id: 2, name: "task2", description: "this is my task 2 in the list" },
+  {
+    id: 1,
+    name: "task1",
+    description: "this is task1 description",
+    status: "complete",
+  },
+  {
+    id: 2,
+    name: "task2",
+    description: "this is my task 2 in the list",
+    status: "incomplete",
+  },
 ];
 exports.validateId = function (req, res, next) {
   const id = Number(req.params.id);
