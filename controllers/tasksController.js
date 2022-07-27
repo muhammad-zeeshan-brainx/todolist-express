@@ -1,92 +1,89 @@
-const taskList = [
-  {
-    id: 1,
-    name: "task1",
-    description: "this is task1 description",
-    status: "complete",
-  },
-  {
-    id: 2,
-    name: "task2",
-    description: "this is my task 2 in the list",
-    status: "incomplete",
-  },
-];
-exports.validateId = function (req, res, next) {
-  const id = Number(req.params.id);
-  let flag = false;
-  for (const task of taskList) {
-    if (task.id === id) {
-      req.body.task = task;
-      next();
-      return;
-    }
+const TaskListModel = require("../models/TaskList.js");
+const taskListServices = require("../services/taskListServices");
+
+const getAllTasks = async function (req, res) {
+  try {
+    const taskList = await taskListServices.getAllTasks({});
+    res.status(200).send({
+      status: "success",
+      tasks: taskList,
+    });
+  } catch (error) {
+    console.log("Something went wrong", error);
+    res.status(500).send("error occured");
   }
-  res.status(404).send({
-    statusCode: 404,
-    status: "Fail",
-    message: `404 not found any record with id ${id}`,
-  });
 };
 
-exports.getAllTasks = function (req, res) {
-  res.status(200).send({
-    statusCode: 200,
-    status: "success",
-    tasks: taskList,
-  });
-};
-
-exports.createTask = function (req, res) {
-  const id = taskList[taskList.length - 1].id + 1;
-  const taskName = req.body.name;
-  const taskDescription = req.body.description;
-
-  const newTask = { id: id, name: taskName, description: taskDescription };
-  taskList.push(newTask);
-
-  res.status(200).send({
-    statusCode: 201,
-    status: "success",
-    message: `successully created new task`,
-    task: newTask,
-  });
-};
-
-exports.getTask = function (req, res, task) {
-  task = req.body.task;
-  res.status(200).send({
-    statusCode: 200,
-    status: "Success",
-    task,
-  });
-};
-
-exports.updateTask = function (req, res) {
-  const task = req.body.task;
-  task.name = req.body.name;
-  task.description = req.body.description;
-
-  res.status(200).send({
-    statusCode: 200,
-    status: "success",
-    message: `successully updated the task`,
-    task,
-  });
-};
-
-exports.deleteTask = function (req, res) {
-  const task = req.body.task;
-
-  for (let i = 0; i < taskList.length; i++) {
-    if (taskList[i].id === task.id) {
-      taskList.splice(i, 1);
-      res.status(200).send({
-        statusCode: 200,
-        status: "success",
-        message: "successfully deleted the item",
-        task,
-      });
-    }
+const createTask = async function (req, res) {
+  try {
+    const task = await taskListServices.createTask(req.body);
+    res.status(200).send({
+      status: "success",
+      message: `successully created new task`,
+      task,
+    });
+  } catch (error) {
+    console.log("Something went wrong", error);
+    res.status(500).send("error occured");
   }
+};
+
+const getTask = async function (req, res) {
+  try {
+    const task = await taskListServices.getTask(Number(req.params.id));
+    res.status(200).send({
+      status: "Success",
+      task,
+    });
+  } catch (error) {
+    console.log("Something went wrong", error);
+    res.status(500).send({
+      status: "Fail",
+      error: error.message,
+    });
+  }
+};
+
+const updateTask = async function (req, res) {
+  try {
+    const task = await taskListServices.updateTask(
+      Number(req.params.id),
+      req.body
+    );
+    res.status(200).send({
+      status: "success",
+      message: `successully updated the task`,
+      task,
+    });
+  } catch (error) {
+    console.log("Something went wrong", error);
+    res.status(500).send({
+      status: "Fail",
+      error: error.message,
+    });
+  }
+};
+
+const deleteTask = async function (req, res) {
+  try {
+    task = await taskListServices.deleteTask(Number(req.params.id));
+    res.status(200).send({
+      status: "success",
+      message: "successfully deleted the item",
+    });
+  } catch (error) {
+    console.log("Something went wrong", error);
+    res.status(500).send({
+      status: "Fail",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  getAllTasks,
+  createTask,
+  getTask,
+  updateTask,
+  deleteTask,
 };
