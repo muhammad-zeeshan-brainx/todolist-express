@@ -5,9 +5,20 @@ const taskListSchema = new mongoose.Schema({
     type: Number,
     unique: true,
   },
-  name: String,
-  description: String,
+
+  name: {
+    type: String,
+  },
+
+  description: {
+    type: String,
+  },
+  status: {
+    type: String,
+    enum: ["complete", "incomplete"],
+  },
 });
+
 const TaskListModel = mongoose.model("TaskList", taskListSchema);
 
 module.exports = TaskListModel;

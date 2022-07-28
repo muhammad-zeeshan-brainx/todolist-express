@@ -16,7 +16,8 @@ const getAllTasks = async function (req, res) {
 
 const createTask = async function (req, res) {
   try {
-    const task = await taskListServices.createTask(req.body);
+    const id = await taskListServices.calculateNewId();
+    const task = await taskListServices.createTask(req.body, id);
     res.status(200).send({
       status: "success",
       message: `successully created new task`,

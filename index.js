@@ -1,25 +1,18 @@
 const express = require("express");
+const db = require("./db.js");
 
-const mongoose = require("mongoose");
+const app = new express();
 
-async function main() {
-  await mongoose.connect("mongodb://localhost:27017/newdb");
-}
+const port = process.env.PORT || 3000;
 
-console.log("hey");
-main()
-  .then(() => {
-    console.log("db connected");
-    const app = new express();
+app.use(express.json());
 
-    const port = process.env.PORT || 3000;
+app.use("/tasks", require("./routes/taskRoutes"));
 
-    app.use(express.json());
-
-    app.use("/tasks", require("./routes/taskRoutes"));
-
+db.connection()
+  .then((res) => {
     app.listen(port, () => console.log(`server started at port ${port}`));
   })
-  .catch((err) => console.log(err));
-
-module.exports = mongoose;
+  .catch((error) => {
+    console.log(error);
+  });

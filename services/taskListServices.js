@@ -8,7 +8,7 @@ const getAllTasks = function (filter) {
   });
 };
 
-const createTask = async function (data) {
+const calculateNewId = function () {
   return new Promise((resolve, reject) => {
     TaskListModel.find()
       .sort({ id: -1 })
@@ -17,20 +17,28 @@ const createTask = async function (data) {
         let id;
         if (lastDocument.length === 0) id = 1;
         else id = lastDocument[0].id + 1;
+        resolve(id);
+      })
+      .catch((error) => {
+        error.message = `error while generating id for new document`;
+        reject(error);
+      });
+  });
+};
 
-        const newTask = {
-          id: id,
-          name: data.name,
-          description: data.description,
-        };
-
-        const task = new TaskListModel(newTask);
-        task
-          .save()
-          .then((task) => {
-            resolve(task);
-          })
-          .catch((error) => reject(error));
+const createTask = async function (data, id) {
+  return new Promise((resolve, reject) => {
+    const newTask = {
+      id: id,
+      name: data.name,
+      description: data.description,
+      status: data.status,
+    };
+    const task = new TaskListModel(newTask);
+    task
+      .save()
+      .then((task) => {
+        resolve(task);
       })
       .catch((error) => reject(error));
   });
@@ -51,7 +59,7 @@ const getTask = async function (id) {
 
 const updateTask = async function (id, data) {
   return new Promise((resolve, reject) => {
-    TaskListModel.findOne({ id: id })
+    getTask(id)
       .then((task) => {
         task.name = data.name;
         task.description = data.description;
@@ -87,4 +95,5 @@ module.exports = {
   getTask,
   updateTask,
   deleteTask,
+  calculateNewId,
 };
