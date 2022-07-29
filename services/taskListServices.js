@@ -2,7 +2,7 @@ const TaskListModel = require("../models/TaskList");
 
 const getAllTasks = function (filter) {
   return new Promise((resolve, reject) => {
-    TaskListModel.find(filter)
+    TaskListModel.aggregate([{ $match: {} }])
       .then((data) => resolve(data))
       .catch((error) => reject(error));
   });
@@ -10,9 +10,7 @@ const getAllTasks = function (filter) {
 
 const calculateNewId = function () {
   return new Promise((resolve, reject) => {
-    TaskListModel.find()
-      .sort({ id: -1 })
-      .limit(1)
+    TaskListModel.aggregate([{ $match: {} }, { $sort: -1 }, { $limit: 1 }])
       .then((lastDocument) => {
         let id;
         if (lastDocument.length === 0) id = 1;
@@ -45,10 +43,11 @@ const createTask = async function (data, id) {
 };
 
 const getTask = async function (id) {
+  console.log(typeof id);
   return new Promise((resolve, reject) => {
-    TaskListModel.findOne({ id: id })
+    TaskListModel.aggregate([{ $match: { id: id } }])
       .then((task) => {
-        if (!task) {
+        if (task.length == 0) {
           throw new Error(`No record found with id ${id}`);
         }
         resolve(task);
@@ -59,14 +58,18 @@ const getTask = async function (id) {
 
 const updateTask = async function (id, data) {
   return new Promise((resolve, reject) => {
-    getTask(id)
-      .then((task) => {
-        task.name = data.name;
-        task.description = data.description;
-        task
-          .save()
-          .then((task) => resolve(task))
-          .catch((error) => reject(error));
+    TaskListModel.updateOne(
+      { id: id },
+      { $set: { name: data.name, description: data.description } }
+    )
+      .then(() => {
+        getTask(id)
+          .then((task) => {
+            resolve(task);
+          })
+          .catch((error) => {
+            reject(error);
+          });
       })
       .catch((error) => {
         error.message = `No record found with id ${id}`;
