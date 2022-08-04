@@ -1,4 +1,4 @@
-const TaskListModel = require("../models/TaskList");
+const TaskListModel = require('../models/TaskList');
 
 const getAllTasks = function (filter) {
   return new Promise((resolve, reject) => {
@@ -10,8 +10,11 @@ const getAllTasks = function (filter) {
 
 const calculateNewId = function () {
   return new Promise((resolve, reject) => {
-    TaskListModel.aggregate([{ $match: {} }, { $sort: -1 }, { $limit: 1 }])
+    TaskListModel.find({})
+      .sort({ id: -1 })
+      .limit(1)
       .then((lastDocument) => {
+        console.log(lastDocument);
         let id;
         if (lastDocument.length === 0) id = 1;
         else id = lastDocument[0].id + 1;
@@ -43,7 +46,6 @@ const createTask = async function (data, id) {
 };
 
 const getTask = async function (id) {
-  console.log(typeof id);
   return new Promise((resolve, reject) => {
     TaskListModel.aggregate([{ $match: { id: id } }])
       .then((task) => {

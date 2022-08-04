@@ -1,13 +1,17 @@
-const express = require("express");
-const db = require("./db.js");
+const express = require('express');
+const db = require('./db.js');
 
 const app = new express();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 app.use(express.json());
 
-app.use("/tasks", require("./routes/taskRoutes"));
+app.get('/api', (req, res) => {
+  res.json({ message: 'Hello from server!' });
+});
+
+app.use('/tasks', require('./routes/taskRoutes'));
 
 db.connection()
   .then((res) => {
