@@ -54,6 +54,7 @@ exports.login = async (req, res, next) => {
       res
         .status(401)
         .json({ status: 'Fail', message: 'incorrect email or password' });
+      return;
     }
 
     //if everything ok, send the token
