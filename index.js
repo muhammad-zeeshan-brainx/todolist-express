@@ -12,6 +12,7 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/tasks', require('./routes/taskRoutes'));
+app.use('/users', require('./routes/userRoutes'));
 
 db.connection()
   .then((res) => {
