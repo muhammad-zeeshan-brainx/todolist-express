@@ -1,4 +1,6 @@
 require('dotenv').config();
+const { promisify } = require('util');
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
@@ -16,6 +18,7 @@ exports.signup = async (req, res, next) => {
       email: req.body.email,
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
+      passwordChangedAt: req.body.passwordChangedAt,
     });
 
     const token = signToken(newUser._id);
@@ -69,4 +72,59 @@ exports.login = async (req, res, next) => {
       message: 'something went wrong',
     });
   }
+};
+
+exports.protect = async (req, res, next) => {
+  //check if auth token is present
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    res.status(401).json({ status: 'Fail', message: 'you are not logged in' });
+    return;
+  }
+
+  //verify the token
+  let decoded;
+  try {
+    decoded = await promisify(jwt.verify)(
+      token,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+  } catch (error) {
+    res.status(401).json({
+      status: 'Fail',
+      message: 'invalid token',
+    });
+    return;
+  }
+
+  //check if user still exist
+  const freshUser = User.findById(decoded.id);
+  if (!freshUser) {
+    res.status(401).json({
+      status: 'Fail',
+      message: 'this user has been deleted',
+    });
+
+    return;
+  }
+  //check if user changed password after the token was issued
+  //   else console.log(freshUser.isPasswordChanged(decoded.iat));
+  //   if (freshUser.isPasswordChanged(decoded.iat)) {
+  //     res.status(401).json({
+  //       status: 'Fail',
+  //       message: 'The password has been changed, please login again.',
+  //     });
+
+  //     return;
+  //   }
+
+  //   req.user = freshUser;
+  next();
 };
